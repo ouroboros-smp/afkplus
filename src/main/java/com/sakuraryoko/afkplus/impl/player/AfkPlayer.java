@@ -26,7 +26,9 @@ import javax.annotation.Nonnull;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.Util;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 
 import com.sakuraryoko.afkplus.impl.config.ConfigWrap;
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
@@ -53,6 +55,7 @@ public class AfkPlayer
     private long lastAttackTime;
     private long lastPlayerListUpdate;
     private String afkReason;
+    private final PositionLock<ResourceKey<Level>> positionLock;
 
     private AfkPlayer(@Nonnull ServerPlayer player)
     {
@@ -71,6 +74,7 @@ public class AfkPlayer
         this.lastAttackTime = Util.getMillis();
         this.lastPlayerListUpdate = -1;     // cause an immediate update upon creation
         this.afkReason = "";
+        this.positionLock = new PositionLock<>();
         this.handler = new AfkHandler(this);
     }
 
@@ -157,6 +161,66 @@ public class AfkPlayer
     public void setLastMovementTime(long lastMovementTime)
     {
         this.lastMovementTime = lastMovementTime;
+    }
+
+    public boolean isPositionLocked()
+    {
+        return this.positionLock.isLocked();
+    }
+
+    void lockPosition()
+    {
+        if (!this.positionLock.isLocked())
+        {
+            this.positionLock.lock(this.player.getX(), this.player.getY(), this.player.getZ(),
+                                   this.getPlayerDimension(), this.player.isNoGravity());
+        }
+
+        this.player.setNoGravity(true);
+        this.player.setDeltaMovement(0.0D, 0.0D, 0.0D);
+    }
+
+    void keepPositionLocked()
+    {
+        if (!this.positionLock.isLocked())
+        {
+            return;
+        }
+
+        this.player.setNoGravity(true);
+        this.player.setDeltaMovement(0.0D, 0.0D, 0.0D);
+
+        ResourceKey<Level> currentDimension = this.getPlayerDimension();
+
+        if (this.positionLock.hasChangedDimension(currentDimension))
+        {
+            this.positionLock.rebase(this.player.getX(), this.player.getY(), this.player.getZ(), currentDimension);
+            return;
+        }
+
+        if (this.positionLock.shouldRestore(this.player.getX(), this.player.getY(), this.player.getZ()))
+        {
+            this.player.connection.teleport(this.positionLock.getX(), this.positionLock.getY(), this.positionLock.getZ(),
+                                            this.player.getYRot(), this.player.getXRot());
+        }
+    }
+
+    void unlockPosition()
+    {
+        if (this.positionLock.isLocked())
+        {
+            this.player.setNoGravity(this.positionLock.getPreviousNoGravity());
+            this.positionLock.unlock();
+        }
+    }
+
+    private ResourceKey<Level> getPlayerDimension()
+    {
+        //#if MC >= 12001
+        //$$ return this.player.level().dimension();
+        //#else
+        return this.player.getLevel().dimension();
+        //#endif
     }
 
     public long getLastLookTime()

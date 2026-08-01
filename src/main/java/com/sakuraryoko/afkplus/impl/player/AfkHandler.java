@@ -105,6 +105,11 @@ public class AfkHandler
         this.player.setAfk(false);
         this.player.setAfkTimeMs(0L);
         this.player.setAfkReason("");
+
+        if (!this.player.isDamageEnabled())
+        {
+            this.enableDamage();
+        }
     }
 
     @ApiStatus.Internal
@@ -159,6 +164,7 @@ public class AfkHandler
     {
         // Doesn't matter if they are marked as AFK --> make them not Invulnerable.
         AfkPlus.debugLog("enableDamage() has been invoked for: {}", this.player.getName());
+        this.player.unlockPosition();
 
         if (this.player.getPlayer().isCreative() || this.player.getPlayer().isSpectator())
         {
@@ -211,6 +217,7 @@ public class AfkHandler
             if (this.player.isDamageEnabled())
             {
                 this.player.setDamageEnabled(false);
+                this.player.lockPosition();
 
                 if (!this.invoker().afkplus$player().isInvulnerable())
                 {
@@ -231,6 +238,12 @@ public class AfkHandler
 
             this.updatePlayerList();
         }
+    }
+
+    @ApiStatus.Internal
+    public void keepPositionLocked()
+    {
+        this.player.keepPositionLocked();
     }
 
     @ApiStatus.Internal
@@ -398,6 +411,8 @@ public class AfkHandler
     @ApiStatus.Internal
     public void reset()
     {
+        this.player.unlockPosition();
+
         if (this.invoker().afkplus$player().isInvulnerable())
         {
             this.toggleInvulnerable(false);

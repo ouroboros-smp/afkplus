@@ -42,6 +42,7 @@ import com.sakuraryoko.afkplus.impl.modinit.AfkPlusInit;
 import com.sakuraryoko.afkplus.impl.placeholders.PlaceholderUtils;
 import com.sakuraryoko.afkplus.impl.player.AfkPlayer;
 import com.sakuraryoko.afkplus.impl.player.AfkPlayerList;
+import com.sakuraryoko.afkplus.impl.player.MovementIntent;
 import com.sakuraryoko.corelib.api.events.IPlayerEventsDispatch;
 
 @ApiStatus.Internal
@@ -367,6 +368,11 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
                 AfkPlus.debugLog("onTickPlayer() - Damage Enabled for player: {} step 5.", afkPlayer.getName());
             }
         }
+
+        if (afkPlayer.isAfk() && !afkPlayer.isDamageEnabled())
+        {
+            afkPlayer.getHandler().keepPositionLocked();
+        }
         // checkAfk
     }
 
@@ -381,6 +387,30 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
             return;
         }
 
+        AfkPlayer afkPlayer = AfkPlayerList.getInstance().getPlayer(player);
+
+        if (afkPlayer == null)
+        {
+            return;
+        }
+
+        if (packet.hasPosition() && this.shouldHandlePlayerMovement(afkPlayer))
+        {
+            double x = packet.getX(player.getX());
+            double y = packet.getY(player.getY());
+            double z = packet.getZ(player.getZ());
+
+            if (player.getX() != x || player.getY() != y || player.getZ() != z)
+            {
+                afkPlayer.setLastMovementTime(Util.getMillis());
+
+                if (ConfigWrap.pack().resetOnMovement)
+                {
+                    player.resetLastActionTime();
+                }
+            }
+        }
+
         if (packet.hasRotation())
         {
             player.getEyeY();
@@ -389,13 +419,6 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
 
             if (pitch != packet.getXRot(pitch) || yaw != packet.getYRot(yaw))
             {
-                AfkPlayer afkPlayer = AfkPlayerList.getInstance().getPlayer(player);
-
-                if (afkPlayer == null)
-                {
-                    return;
-                }
-
                 afkPlayer.setLastLookTime(Util.getMillis());
 
                 if (ConfigWrap.pack().resetOnLook)
@@ -405,6 +428,26 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
             }
         }
         // checkPlayerLook
+    }
+
+    private boolean shouldHandlePlayerMovement(AfkPlayer afkPlayer)
+    {
+        if (!afkPlayer.isPositionLocked())
+        {
+            return true;
+        }
+
+        //#if MC >= 12103
+        //$$ return MovementIntent.hasMovementInput(afkPlayer.getPlayer().getLastClientInput().forward(),
+        //$$                                              afkPlayer.getPlayer().getLastClientInput().backward(),
+        //$$                                              afkPlayer.getPlayer().getLastClientInput().left(),
+        //$$                                              afkPlayer.getPlayer().getLastClientInput().right(),
+        //$$                                              afkPlayer.getPlayer().getLastClientInput().jump());
+        //#else
+        // Older servers do not receive directional input separately from position updates, so a protected
+        // player must use another action or /afk to return without making collision movement exploitable.
+        return false;
+        //#endif
     }
 
     @ApiStatus.Internal
@@ -483,35 +526,6 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
             afkPlayer.getHandler().unregisterAfk();
         }
         // onActionTimeUpdate
-    }
-
-    @ApiStatus.Internal
-    public void onSetPos(@Nullable ServerPlayer player, double x, double y, double z)
-    {
-        if (player != null)
-        {
-            if (VanishAPICompat.hasVanish() && VanishAPICompat.isVanishedByEntity(player))
-            {
-                return;
-            }
-
-            //AfkPlusMod.debugLog("onSetPos(): Player [{}] // setPos[{}]", player.getName().getString(), new Vector3d(x, y, z));
-
-            if ((player.getX() != x || player.getY() != y || player.getZ() != z))
-            {
-                AfkPlayer afkPlayer = AfkPlayerList.getInstance().getPlayer(player);
-
-                if (afkPlayer != null)
-                {
-                    afkPlayer.setLastMovementTime(Util.getMillis());
-
-                    if (ConfigWrap.pack().resetOnMovement)
-                    {
-                        player.resetLastActionTime();
-                    }
-                }
-            }
-        }
     }
 
     @ApiStatus.Internal

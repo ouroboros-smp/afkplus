@@ -65,13 +65,6 @@ public abstract class MixinServerPlayer extends Entity implements IPlayerInvoker
     }
 
     @Override
-    public void setPos(double x, double y, double z)
-    {
-        PlayerEventsHandler.getInstance().onSetPos(this.player, x, y, z);
-        super.setPos(x, y, z);
-    }
-
-    @Override
     public boolean isPushable()
     {
         return PlayerEventsHandler.getInstance().onCheckIfPushable(this.player, super.isPushable());
