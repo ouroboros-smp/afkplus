@@ -48,7 +48,7 @@ public class NoAfkCommand implements IServerCommand
     {
         dispatcher.register(
                 literal(this.getName())
-                        .requires(PermsWrap.check(this.getNode(), ConfigWrap.afk().noAfkCommandPermissions))
+                        .requires(ctx -> PermsWrap.check(ctx, this.getName(), ConfigWrap.afk().noAfkCommandPermissions))
                         .executes(ctx -> this.setNoAfk(ctx.getSource(), ctx))
         );
     }
