@@ -278,9 +278,10 @@ public class AfkHandler
     {
         if (this.player.isAfk() && ConfigWrap.kick().afkKickEnabled)
         {
+            // PermsWrap prefixes these with the mod id, so the qualified nodes are afkplus.kick.safe and afkplus.afkplus.
             if (((this.player.getPlayer().isCreative() || this.player.getPlayer().isSpectator()) && !ConfigWrap.kick().afkKickNonSurvival) ||
-               (PermsWrap.check(this.player.getPlayer(), Reference.MOD_ID + ".kick.safe", ConfigWrap.kick().afkKickSafePermissions)) ||
-               (PermsWrap.check(this.player.getPlayer(), Reference.MOD_ID + ".afkplus", ConfigWrap.afk().afkPlusCommandPermissions)))
+               (PermsWrap.check(this.player.getPlayer(), "kick.safe", ConfigWrap.kick().afkKickSafePermissions)) ||
+               (PermsWrap.check(this.player.getPlayer(), Reference.MOD_ID, ConfigWrap.afk().afkPlusCommandPermissions)))
             {
                 return;
             }

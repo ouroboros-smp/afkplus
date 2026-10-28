@@ -217,7 +217,7 @@ public class AfkConfigHandler implements IConfigDispatch
         }
         if (newConf.PLACEHOLDER.afkPlusNamePlaceholderAfk.equals("<i><gray>[AFK%afkplus:invulnerable%] %player:displayname_unformatted%<r>"))
         {
-            newConf.PLACEHOLDER.afkPlusNamePlaceholderAfk = "<i><gray>[AFK%afkplus:invulnerable%%afkplus:unplugged%] %player:displayname_unformatted%<r";
+            newConf.PLACEHOLDER.afkPlusNamePlaceholderAfk = "<i><gray>[AFK%afkplus:invulnerable%%afkplus:unplugged%] %player:displayname_unformatted%<r>";
         }
 
         // Upgrade (June 2026) defaulted configs to replace it with "%afkplus:unplugged%"
@@ -231,7 +231,7 @@ public class AfkConfigHandler implements IConfigDispatch
         }
         if (newConf.PLACEHOLDER.afkPlusNamePlaceholderAfk.equals("<i><gray>[AFK%afkplus:invulnerable%%afkplus:shadow%] %player:displayname_unformatted%<r>"))
         {
-            newConf.PLACEHOLDER.afkPlusNamePlaceholderAfk = "<i><gray>[AFK%afkplus:invulnerable%%afkplus:unplugged%] %player:displayname_unformatted%<r";
+            newConf.PLACEHOLDER.afkPlusNamePlaceholderAfk = "<i><gray>[AFK%afkplus:invulnerable%%afkplus:unplugged%] %player:displayname_unformatted%<r>";
         }
 
         // Copy Incoming Config
