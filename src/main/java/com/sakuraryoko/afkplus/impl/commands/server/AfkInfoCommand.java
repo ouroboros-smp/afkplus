@@ -52,7 +52,7 @@ public class AfkInfoCommand implements IServerCommand
     {
         dispatcher.register(
                 literal(this.getName())
-                        .requires(PermsWrap.check(this.getNode(), ConfigWrap.afk().afkInfoCommandPermissions))
+                        .requires(ctx -> PermsWrap.check(ctx, this.getName(), ConfigWrap.afk().afkInfoCommandPermissions))
                         .then(argument("player", EntityArgument.player())
                                       .executes(ctx -> this.infoAfkPlayer(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), ctx))
                         )

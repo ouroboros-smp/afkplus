@@ -123,6 +123,10 @@ public abstract class MixinServerPlayer extends Entity implements IPlayerInvoker
     @Override
     public void afkplus$setInvulnerable(boolean toggle)
     {
+        //#if MC >= 26.3
+        //$$ this.setPermanentlyInvulnerable(toggle);
+        //#else
         this.setInvulnerable(toggle);
+        //#endif
     }
 }

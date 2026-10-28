@@ -52,10 +52,10 @@ public class AfkCommand implements IServerCommand
     {
         dispatcher.register(
                 literal(this.getName())
-                        .requires(PermsWrap.check(this.getNode(), ConfigWrap.afk().afkCommandPermissions))
+                        .requires(ctx -> PermsWrap.check(ctx, this.getName(), ConfigWrap.afk().afkCommandPermissions))
                         .executes(ctx -> this.setAfk(ctx.getSource(), "", ctx))
                         .then(argument("reason", StringArgumentType.greedyString())
-                                      .requires(PermsWrap.check(this.getNode(), ConfigWrap.afk().afkCommandPermissions))
+                                      .requires(ctx -> PermsWrap.check(ctx, this.getName(), ConfigWrap.afk().afkCommandPermissions))
                                       .executes(ctx -> this.setAfk(ctx.getSource(), StringArgumentType.getString(ctx, "reason"), ctx))
                         )
         );
